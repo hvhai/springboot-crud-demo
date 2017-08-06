@@ -6,6 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Controller
 @RequestMapping(path = "/demo")
 public class UserController {
@@ -13,12 +16,15 @@ public class UserController {
     private UserRepository userRepository;
 
     @PostMapping(path = "/add")
-    public @ResponseBody String addNewUser(@RequestBody User user){
-//        User u = new User();
-//        u.setName(name);
-//        u.setEmail(email);
-        userRepository.save(user);
-        return "Saved";
+    public @ResponseBody Object addNewUser(@RequestBody User user){
+        Map<String, String> message = new HashMap<>();
+        user = userRepository.save(user);
+        if(user == null){
+            message.put("error","add error");
+        }else{
+            message.put("info","add ok");
+        }
+        return message;
     }
 
     @GetMapping(path="/all")
@@ -33,16 +39,28 @@ public class UserController {
     }
 
     @PutMapping(path = "/update/{id}")
-    public @ResponseBody String updateUserById(@PathVariable("id") Long id, @RequestBody User user){
+    public @ResponseBody Object updateUserById(@PathVariable("id") Long id, @RequestBody User user){
+        Map<String, String> message = new HashMap<>();
         user.setId(id);
         userRepository.save(user);
-        return "updated";
+        if(user == null){
+            message.put("error","update error");
+        }else{
+            message.put("info","update ok");
+        }
+        return message;
     }
 
     @DeleteMapping(path = "/delete/{id}")
-    public @ResponseBody String deleteUserById(@PathVariable("id") Long id){
+    public @ResponseBody Object deleteUserById(@PathVariable("id") Long id){
+        Map<String, String> message = new HashMap<>();
         userRepository.delete(id);
-        return "deleted";
+        if (userRepository.findOne(id) != null) {
+            message.put("error", "delete error");
+        }else{
+            message.put("info", "delete ok");
+        }
+        return message;
     }
 
 }
